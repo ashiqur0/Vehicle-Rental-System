@@ -14,12 +14,21 @@ async function calculateTotalPrice(vehicle_id: number, rent_start_date: string, 
 }
 
 const createBooking = async (payload: Record<string, unknown>) => {
-    // rent_start_date format: YYYY-MM-DD for example: 2024-07-01
-    // rent_end_date format: YYYY-MM-DD for example: 2024-07-05
-
+    // date format: YYYY-MM-DD for example: 2026-03-01
     const { customer_id, vehicle_id, rent_start_date, rent_end_date } = payload;
+
+    // check if vehicle is available
+    const vehicleResult = await pool.query(`SELECT availability_status FROM vehicles WHERE id = $1`, [vehicle_id]);
+    if (vehicleResult.rowCount === 0) {
+        return "Vehicle not found";
+    }
+
+    if (vehicleResult.rows[0].availability_status !== 'available') {
+        return "Vehicle is not available";
+    }
+
     const total_price = await calculateTotalPrice(vehicle_id as number, rent_start_date as string, rent_end_date as string);
-    
+
     const result = await pool.query(`
         INSERT INTO bookings (customer_id, vehicle_id, rent_start_date, rent_end_date, total_price)
         VALUES ($1, $2, $3, $4, $5) RETURNING *
@@ -30,8 +39,21 @@ const createBooking = async (payload: Record<string, unknown>) => {
         rent_end_date,
         total_price
     ]);
-    
-    return result.rows[0];
+
+    if (result.rowCount) {
+        const status = 'booked';
+        await pool.query(`
+            UPDATE vehicles SET availability_status = $1 WHERE id = $2
+        `, [status, vehicle_id]);
+    }
+
+    return {
+        updatedVehicle: {
+            id: vehicle_id,
+            availability_status: 'booked'
+        },
+        booking: result.rows[0]
+    };
 }
 
 export const bookingServices = {

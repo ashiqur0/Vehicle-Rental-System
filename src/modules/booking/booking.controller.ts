@@ -5,6 +5,13 @@ const createBooking = async (req: Request, res: Response) => {
     try {
         const result = await bookingServices.createBooking(req.body);
 
+        if (typeof result === 'string') {
+            return res.status(400).json({
+                success: false,
+                message: result
+            });
+        }
+        
         res.status(201).json({
             success: true,
             message: "Booking created successfully",
