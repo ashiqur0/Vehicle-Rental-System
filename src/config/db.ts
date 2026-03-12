@@ -27,6 +27,18 @@ const initDb = async () => {
             availability_status VARCHAR(20) DEFAULT 'available'
         )
     `);
+
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS bookings (
+            id SERIAL PRIMARY KEY,
+            customer_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+            vehicle_id INTEGER REFERENCES vehicles(id) ON DELETE CASCADE,
+            rent_start_date DATE NOT NULL,
+            rent_end_date DATE NOT NULL,
+            total_price NUMERIC(10, 2) NOT NULL,
+            status VARCHAR(20) DEFAULT 'active                
+        )
+    `);
 }
 
 export default initDb;
