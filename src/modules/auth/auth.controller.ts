@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
-import { authSearvices } from "./auth.service";
+import { authServices } from "./auth.service";
 
 
 const signup = async (req: Request, res: Response) => {
     try {
-        const result = await authSearvices.signup(req.body);
+        const result = await authServices.signup(req.body);
 
         if (!result) {
             return res.status(400).json({
@@ -27,6 +27,25 @@ const signup = async (req: Request, res: Response) => {
     }
 }
 
+const signin = async (req: Request, res: Response) => {
+    try {
+        const result = await authServices.signin(req.body);
+        
+        res.status(200).json({
+            success: true,
+            message: "User signed in successfully",
+            data: result
+        })
+    } catch (error: any) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+            details: error
+        })
+    }
+}
+
 export const authController = {
     signup,
+    signin
 }

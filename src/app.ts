@@ -14,6 +14,6 @@ app.get('/', (req: Request, res: Response) => {
   res.send('Welcome to the Vehicle Rental System API!');
 });
 
-app.use('/api/v1/auth/signup', authRoutes);
+app.use('/api/v1/auth', authRoutes);
 
 export default app;
