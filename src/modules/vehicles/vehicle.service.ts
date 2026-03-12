@@ -22,11 +22,11 @@ const getSingleVehicle = async (id: string) => {
     return result;
 }
 
-const updateVehicle = async (payload: Record<string, unknown>) => {
-    const { vehicle_name, type, registration_number, daily_rent_price, availability_status, id } = payload;
+const updateVehicle = async (payload: Record<string, unknown>, vehicleId: string) => {
+    const { vehicle_name, type, registration_number, daily_rent_price, availability_status } = payload;
     const result = await pool.query(`
         UPDATE vehicles SET vehicle_name=$1, type=$2, registration_number=$3, daily_rent_price=$4, availability_status=$5 WHERE id=$6 RETURNING *`,
-        [vehicle_name, type, registration_number, daily_rent_price, availability_status, id]
+        [vehicle_name, type, registration_number, daily_rent_price, availability_status, vehicleId]
     );
 
     return result;

@@ -57,8 +57,9 @@ const getSingleVehicle = async (req: Request, res: Response) => {
 }
 
 const updateVehicle = async (req: Request, res: Response) => {
+    const { vehicleId } = req.params;
     try {
-        const result = await vehicleServices.updateVehicle(req.body);
+        const result = await vehicleServices.updateVehicle(req.body, vehicleId as string);
 
         res.status(200).json({
             success: true,
