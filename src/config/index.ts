@@ -3,6 +3,9 @@ import path from 'path';
 
 dotenv.config({ path: path.join(process.cwd(), '.env')});
 
-export const config = {
+const config = {
     connection_string: process.env.CONNECTION_STRING,
+    port: process.env.PORT,
 }
+
+export default config;
