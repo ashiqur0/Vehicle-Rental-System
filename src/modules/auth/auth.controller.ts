@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { authServices } from "./auth.service";
+import config from "../../config";
+import jwt from 'jsonwebtoken';
 
 
 const signup = async (req: Request, res: Response) => {
@@ -12,11 +14,14 @@ const signup = async (req: Request, res: Response) => {
                 message: "Password must be at least 6 characters long. Name, email, and phone are required."
             });
         }
-        
+
+        const user = result.rows[0];
+        const token = jwt.sign({ name: user.name, email: user.email, role: user.role }, config.jwt_secret as string, { expiresIn: '7d' });
+
         res.status(201).json({
             success: true,
             message: "User created successfully",
-            data: result.rows[0]
+            data: { user, token }
         });
     } catch (error: any) {
         res.status(500).json({
@@ -30,7 +35,7 @@ const signup = async (req: Request, res: Response) => {
 const signin = async (req: Request, res: Response) => {
     try {
         const result = await authServices.signin(req.body);
-        
+
         res.status(200).json({
             success: true,
             message: "User signed in successfully",
