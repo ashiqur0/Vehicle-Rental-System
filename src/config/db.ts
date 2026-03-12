@@ -36,7 +36,7 @@ const initDb = async () => {
             rent_start_date DATE NOT NULL,
             rent_end_date DATE NOT NULL,
             total_price NUMERIC(10, 2) NOT NULL,
-            status VARCHAR(20) DEFAULT 'active                
+            status VARCHAR(20) DEFAULT 'active'           
         )
     `);
 }
