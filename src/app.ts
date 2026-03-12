@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import initDb from "./config/db";
-import { userRoutes } from './modules/users/user.routes';
+import { authRoutes } from './modules/auth/auth.routes';
 
 const app = express();
 app.use(express.json());
@@ -14,6 +14,6 @@ app.get('/', (req: Request, res: Response) => {
   res.send('Welcome to the Vehicle Rental System API!');
 });
 
-app.use('/users', userRoutes);
+app.use('/api/v1/auth/signup', authRoutes);
 
 export default app;
