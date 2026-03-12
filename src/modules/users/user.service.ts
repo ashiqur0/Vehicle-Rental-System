@@ -1,21 +1,39 @@
 import { pool } from "../../config/db";
-import bcrypt from 'bcryptjs';
 
-const createUser = async (payload: Record<string, string>) => {
-    const { name, email, password, phone, role='customer' } = payload;
+const getUsers = async () => {
+    const result = await pool.query(`SELECT * FROM users`);
+    
+    return result;
+}
 
-    if (password!.length < 6 || !email || !name || !phone) return null;
-
-    const processedEmail = (email as string).toLowerCase();
-    const hashedPassword = await bcrypt.hash(password as string, 10);
-
+const updateUser = async (payload: Record<string, unknown>, userId: string) => {
+    const { name, email, phone, role } = payload;
     const result = await pool.query(`
-        INSERT INTO users (name, email, password, phone, role) VALUES ($1, $2, $3, $4, $5) RETURNING *`, [name, processedEmail, hashedPassword, phone, role]
+        UPDATE users SET name = $1, email = $2, phone = $3, role = $4 WHERE id = $5 RETURNING *`, 
+        [name, email, phone, role, userId]
     );
+    return result;
+}
+
+const updateUserByThemselves = async (payload: Record<string, unknown>, userId: string) => {
+    const { name, email, phone } = payload;
+    const result = await pool.query(`
+        UPDATE users SET name = $1, email = $2, phone = $3 WHERE id = $4 RETURNING *`, 
+        [name, email, phone, userId]
+    );
+    return result;
+}
+
+
+const deleteUser = async (userId: string) => {
+    const result = await pool.query(`DELETE FROM users WHERE id = $1`, [userId]);
 
     return result;
 }
 
 export const userServices = {
-    createUser,
+    getUsers,
+    updateUser,
+    updateUserByThemselves,
+    deleteUser
 }

@@ -1,21 +1,14 @@
 import { Request, Response } from "express";
 import { userServices } from "./user.service";
 
-const createUser = async (req: Request, res: Response) => {
+const getUsers = async (req: Request, res: Response) => {
     try {
-        const result = await userServices.createUser(req.body);
+        const result = await userServices.getUsers();
 
-        if (!result) {
-            return res.status(400).json({
-                success: false,
-                message: "Password must be at least 6 characters long. Name, email, and phone are required."
-            });
-        }
-        
-        res.status(201).json({
+        res.status(200).json({
             success: true,
-            message: "User created successfully",
-            data: result.rows[0]
+            message: "Users retrieved successfully",
+            data: result.rows
         });
     } catch (error: any) {
         res.status(500).json({
@@ -26,6 +19,86 @@ const createUser = async (req: Request, res: Response) => {
     }
 }
 
+const updateUser = async (req: Request, res: Response) => {
+    const { userId } = req.params;
+    try {
+        const result = await userServices.updateUser(req.body, userId as string);
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        } else {
+            res.status(200).json({
+                success: true,
+                message: "User updated successfully",
+                data: result.rows[0]
+            });
+        }
+    } catch (error: any) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+            details: error
+        })
+    }
+}
+
+const updateUserByThemselves = async (req: Request, res: Response) => {
+    const {userId} = req.params;
+    try {
+        const result = await userServices.updateUserByThemselves(req.body, userId as string);
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        } else {
+            res.status(200).json({
+                success: true,
+                message: "User updated successfully",
+                data: result.rows[0]
+            });
+        }
+    } catch (error: any) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+            details: error
+        })
+    }
+}
+
+const deleteUser = async (req: Request, res: Response) => {
+    const { userId } = req.params;
+    try {
+        const result = await userServices.deleteUser(userId as string);
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        } else {
+            res.status(200).json({
+                success: true,
+                message: "User deleted successfully"
+            });
+        }
+    } catch (error: any) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+            details: error
+        })
+    }
+}
+
 export const userController = {
-    createUser,
+    getUsers,
+    updateUser,
+    updateUserByThemselves,
+    deleteUser
 }
