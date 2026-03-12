@@ -45,6 +45,32 @@ const updateUser = async (req: Request, res: Response) => {
     }
 }
 
+const updateUserByThemselves = async (req: Request, res: Response) => {
+    const {userId} = req.params;
+    try {
+        const result = await userServices.updateUserByThemselves(req.body, userId as string);
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        } else {
+            res.status(200).json({
+                success: true,
+                message: "User updated successfully",
+                data: result.rows[0]
+            });
+        }
+    } catch (error: any) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+            details: error
+        })
+    }
+}
+
 const deleteUser = async (req: Request, res: Response) => {
     const { userId } = req.params;
     try {
@@ -73,5 +99,6 @@ const deleteUser = async (req: Request, res: Response) => {
 export const userController = {
     getUsers,
     updateUser,
+    updateUserByThemselves,
     deleteUser
 }

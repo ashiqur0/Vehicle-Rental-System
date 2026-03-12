@@ -15,6 +15,16 @@ const updateUser = async (payload: Record<string, unknown>, userId: string) => {
     return result;
 }
 
+const updateUserByThemselves = async (payload: Record<string, unknown>, userId: string) => {
+    const { name, email, phone } = payload;
+    const result = await pool.query(`
+        UPDATE users SET name = $1, email = $2, phone = $3 WHERE id = $4 RETURNING *`, 
+        [name, email, phone, userId]
+    );
+    return result;
+}
+
+
 const deleteUser = async (userId: string) => {
     const result = await pool.query(`DELETE FROM users WHERE id = $1`, [userId]);
 
@@ -24,5 +34,6 @@ const deleteUser = async (userId: string) => {
 export const userServices = {
     getUsers,
     updateUser,
+    updateUserByThemselves,
     deleteUser
 }
