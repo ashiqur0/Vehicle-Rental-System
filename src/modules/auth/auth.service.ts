@@ -15,7 +15,10 @@ const signup = async (payload: Record<string, string>) => {
         INSERT INTO users (name, email, password, phone, role) VALUES ($1, $2, $3, $4, $5) RETURNING *`, [name, processedEmail, hashedPassword, phone, role]
     );
 
-    return result;
+    const user = result.rows[0];
+    const token = jwt.sign({ name: user.name, email: user.email, role: user.role }, config.jwt_secret as string, { expiresIn: '7d' });
+
+    return { user, token };
 }
 
 const signin = async (payload: Record<string, string>) => {
@@ -28,7 +31,7 @@ const signin = async (payload: Record<string, string>) => {
     const match = await bcrypt.compare(password!, user.password);
     if (!match) return null;
 
-    const token = jwt.sign({ name: user.name, email: user.email, role: user.role }, config.jwt_secret as string, { expiresIn: '7d'});
+    const token = jwt.sign({ name: user.name, email: user.email, role: user.role }, config.jwt_secret as string, { expiresIn: '7d' });
 
     return { user, token };
 }

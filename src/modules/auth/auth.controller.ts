@@ -1,8 +1,5 @@
 import { Request, Response } from "express";
 import { authServices } from "./auth.service";
-import config from "../../config";
-import jwt from 'jsonwebtoken';
-
 
 const signup = async (req: Request, res: Response) => {
     try {
@@ -15,13 +12,10 @@ const signup = async (req: Request, res: Response) => {
             });
         }
 
-        const user = result.rows[0];
-        const token = jwt.sign({ name: user.name, email: user.email, role: user.role }, config.jwt_secret as string, { expiresIn: '7d' });
-
         res.status(201).json({
             success: true,
             message: "User created successfully",
-            data: { user, token }
+            data: { user: result.user, token: result.token }
         });
     } catch (error: any) {
         res.status(500).json({
