@@ -1,21 +1,14 @@
 import { Request, Response } from "express";
 import { userServices } from "./user.service";
 
-const createUser = async (req: Request, res: Response) => {
+const getUsers = async (req: Request, res: Response) => {
     try {
-        const result = await userServices.createUser(req.body);
+        const result = await userServices.getUsers();
 
-        if (!result) {
-            return res.status(400).json({
-                success: false,
-                message: "Password must be at least 6 characters long. Name, email, and phone are required."
-            });
-        }
-        
-        res.status(201).json({
+        res.status(200).json({
             success: true,
-            message: "User created successfully",
-            data: result.rows[0]
+            message: "Users retrieved successfully",
+            data: result.rows
         });
     } catch (error: any) {
         res.status(500).json({
@@ -27,5 +20,5 @@ const createUser = async (req: Request, res: Response) => {
 }
 
 export const userController = {
-    createUser,
+    getUsers,
 }
