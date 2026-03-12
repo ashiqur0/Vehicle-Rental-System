@@ -19,6 +19,26 @@ const getUsers = async (req: Request, res: Response) => {
     }
 }
 
+const updateUser = async (req: Request, res: Response) => {
+    const { userId } = req.params;
+    try {
+        const result = await userServices.updateUser(req.body, userId as string);
+
+        res.status(200).json({
+            success: true,
+            message: "User updated successfully",
+            data: result.rows[0]
+        });
+    } catch (error: any) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+            details: error
+        })
+    }
+}
+
 export const userController = {
     getUsers,
+    updateUser,
 }
