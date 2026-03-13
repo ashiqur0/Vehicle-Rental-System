@@ -14,7 +14,13 @@ const signup = async (payload: Record<string, string>) => {
         INSERT INTO users (name, email, password, phone, role) VALUES ($1, $2, $3, $4, $5) RETURNING *`, [name, email, hashedPassword, phone, role]
     );
 
-    return result;
+    return {
+        id: result.rows[0].id,
+        name: result.rows[0].name,
+        email: result.rows[0].email,
+        phone: result.rows[0].phone,
+        role: result.rows[0].role
+    };
 }
 
 const signin = async (email: string, password: string) => {
