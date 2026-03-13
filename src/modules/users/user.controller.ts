@@ -21,36 +21,26 @@ const getUsers = async (req: Request, res: Response) => {
 
 const updateUser = async (req: Request, res: Response) => {
     const { userId } = req.params;
-    try {
-        const result = await userServices.updateUser(req.body, userId as string);
+    const { email } = req.query;
 
-        if (result.rowCount === 0) {
-            return res.status(404).json({
-                success: false,
-                message: "User not found"
-            });
-        } else {
-            res.status(200).json({
-                success: true,
-                message: "User updated successfully",
-                data: result.rows[0]
-            });
+    try {
+
+        let result = null;
+
+        if (req?.user?.role === 'admin') {
+            result = await userServices.updateUserByAdmin(req.body, userId as string);
+        } else if (req?.user?.role === 'customer') {
+            if (email !== req?.user?.email) {
+                return res.status(403).json({
+                    success: false,
+                    message: "You are not allowed to update this user"
+                });
+            }
+
+            result = await userServices.updateUserByOwner(req.body, userId as string);
         }
-    } catch (error: any) {
-        res.status(500).json({
-            success: false,
-            message: error.message,
-            details: error
-        })
-    }
-}
 
-const updateUserByThemselves = async (req: Request, res: Response) => {
-    const {userId} = req.params;
-    try {
-        const result = await userServices.updateUserByThemselves(req.body, userId as string);
-
-        if (result.rowCount === 0) {
+        if (result?.rowCount === 0) {
             return res.status(404).json({
                 success: false,
                 message: "User not found"
@@ -59,7 +49,7 @@ const updateUserByThemselves = async (req: Request, res: Response) => {
             res.status(200).json({
                 success: true,
                 message: "User updated successfully",
-                data: result.rows[0]
+                data: result?.rows[0]
             });
         }
     } catch (error: any) {
@@ -99,6 +89,5 @@ const deleteUser = async (req: Request, res: Response) => {
 export const userController = {
     getUsers,
     updateUser,
-    updateUserByThemselves,
     deleteUser
 }
