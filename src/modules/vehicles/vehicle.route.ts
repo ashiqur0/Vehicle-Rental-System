@@ -1,12 +1,17 @@
 import express from 'express';
 import { vehicleController } from './vehicle.controller';
+import auth from '../../middleware/auth';
+import verifyAdmin from '../../middleware/admin';
 
 const router = express.Router();
 
-router.post('/', vehicleController.createVehicle);
+// admin only routes
+router.post('/', auth('admin'), verifyAdmin, vehicleController.createVehicle);
+router.put('/:vehicleId', auth('admin'), verifyAdmin, vehicleController.updateVehicle);
+router.delete('/:vehicleId', auth('admin'), verifyAdmin, vehicleController.deleteVehicle);
+
+// public routes
 router.get('/', vehicleController.getVehicles);
 router.get('/:vehicleId', vehicleController.getSingleVehicle);
-router.put('/:vehicleId', vehicleController.updateVehicle);
-router.delete('/:vehicleId', vehicleController.deleteVehicle);
 
 export const vehicleRoutes = router;
