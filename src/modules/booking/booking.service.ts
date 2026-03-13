@@ -39,7 +39,7 @@ const createBooking = async (payload: Record<string, unknown>) => {
     const { customer_id, vehicle_id, rent_start_date, rent_end_date } = payload;
 
     // check if vehicle is available
-    const vehicleResult = await pool.query(`SELECT availability_status FROM vehicles WHERE id = $1`, [vehicle_id]);
+    const vehicleResult = await pool.query(`SELECT availability_status, vehicle_name, daily_rent_price FROM vehicles WHERE id = $1`, [vehicle_id]);
     if (vehicleResult.rowCount === 0) {
         return "Vehicle not found";
     }
@@ -68,12 +68,14 @@ const createBooking = async (payload: Record<string, unknown>) => {
         `, [status, vehicle_id]);
     }
 
+    const bookevVehicle = result.rows[0];
+
     return {
-        updatedVehicle: {
-            id: vehicle_id,
-            availability_status: 'booked'
+        ...bookevVehicle,
+        vehicle: {
+            vehicle_name: vehicleResult.rows[0].vehicle_name,
+            daily_rent_price: vehicleResult.rows[0].daily_rent_price
         },
-        booking: result.rows[0]
     };
 }
 
