@@ -5,6 +5,13 @@ const getUsers = async (req: Request, res: Response) => {
     try {
         const result = await userServices.getUsers();
 
+        if (result.rowCount === 0) {
+            return res.status(200).json({
+                success: true,
+                message: "No users found"
+            });
+        }
+
         res.status(200).json({
             success: true,
             message: "Users retrieved successfully",

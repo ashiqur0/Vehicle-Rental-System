@@ -23,7 +23,7 @@ const initDb = async () => {
             vehicle_name VARCHAR(255) NOT NULL,
             type VARCHAR(50),
             registration_number VARCHAR(50) NOT NULL UNIQUE,
-            daily_rent_price NUMERIC(10, 2) NOT NULL CHECK (daily_rent_price > 0),
+            daily_rent_price INTEGER NOT NULL CHECK (daily_rent_price > 0),
             availability_status VARCHAR(20) DEFAULT 'available'
         )
     `);
@@ -35,8 +35,8 @@ const initDb = async () => {
             vehicle_id INTEGER REFERENCES vehicles(id) ON DELETE CASCADE,
             rent_start_date DATE NOT NULL,
             rent_end_date DATE NOT NULL CHECK (rent_end_date > rent_start_date),
-            total_price NUMERIC(10, 2) NOT NULL CHECK (total_price > 0),
-            status VARCHAR(20) DEFAULT 'active'       
+            total_price INTEGER NOT NULL CHECK (total_price > 0),
+            status VARCHAR(20) DEFAULT 'active'     
         )
     `);
 }
