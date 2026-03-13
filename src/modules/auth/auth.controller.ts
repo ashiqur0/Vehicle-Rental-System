@@ -27,13 +27,22 @@ const signup = async (req: Request, res: Response) => {
 }
 
 const signin = async (req: Request, res: Response) => {
+    const { email, password } = req.body;
+
     try {
-        const result = await authServices.signin(req.body);
+        const result = await authServices.signin(email, password);
+
+        if (!result) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid email or password"
+            });
+        }
 
         res.status(200).json({
             success: true,
             message: "User signed in successfully",
-            data: result
+            data: { user: result.user, token: result.token }
         })
     } catch (error: any) {
         res.status(500).json({
