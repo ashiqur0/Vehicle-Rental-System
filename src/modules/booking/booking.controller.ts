@@ -28,7 +28,30 @@ const createBooking = async (req: Request, res: Response) => {
 
 const getBookings = async (req: Request, res: Response) => {
     try {
-        const result = await bookingServices.getBookings();
+        let result = null;
+        const tokenEmail = req?.user?.email;
+        const userEmail = req?.query?.email;
+
+        if (req?.user?.role === 'admin') {
+            result = await bookingServices.getBookings();
+        } else if (req?.user?.role === 'customer') {
+            if (tokenEmail !== userEmail) {
+                return res.status(403).json({
+                    success: false,
+                    message: "Forbidden"
+                });
+            }
+            
+            result = await bookingServices.getBookingByOwner(userEmail as string);
+        }
+
+        if (!result) {
+            return res.status(404).json({
+                success: false,
+                message: "No bookings found"
+            });
+        }
+
         res.status(200).json({
             success: true,
             message: "Bookings retrieved successfully",

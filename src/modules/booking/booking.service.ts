@@ -58,6 +58,16 @@ const createBooking = async (payload: Record<string, unknown>) => {
 
 const getBookings = async () => {
     const result = await pool.query(`SELECT * FROM bookings`);
+
+    return result.rows;
+}
+
+const getBookingByOwner = async (userEmail: string) => {
+    const result = await pool.query(`
+        SELECT b.* FROM bookings b
+        JOIN users u ON b.customer_id = u.id
+        WHERE u.email = $1`, [userEmail]);
+
     return result.rows;
 }
 
@@ -88,5 +98,6 @@ const updateBooking = async (bookingId: string, payload: Record<string, unknown>
 export const bookingServices = {
     createBooking,
     getBookings,
+    getBookingByOwner,
     updateBooking
 }
