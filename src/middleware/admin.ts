@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 
-const verifyAdmin = (role: string) => {
-    return (req: Request, res: Response, next: NextFunction) => {
+const verifyAdmin = () => {
+    return async (req: Request, res: Response, next: NextFunction) => {
         try {
-            if (role !== req?.user?.role) {
+            if (req?.user?.role !== 'admin') {
                 return res.status(403).json({
                     success: false,
                     message: "Forbidden"
