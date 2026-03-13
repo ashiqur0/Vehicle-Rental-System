@@ -71,7 +71,7 @@ const getBookingByOwner = async (userEmail: string) => {
     return result.rows;
 }
 
-const updateBooking = async (bookingId: string, payload: Record<string, unknown>) => {
+const updateBookingByAdmin = async (bookingId: string, payload: Record<string, unknown>) => {
     const { rent_start_date, rent_end_date } = payload;
 
     const total_price = await calculateTotalPrice(
@@ -85,19 +85,43 @@ const updateBooking = async (bookingId: string, payload: Record<string, unknown>
         SET rent_start_date = $1, rent_end_date = $2, total_price = $3
         WHERE id = $4
         RETURNING *
-    `, [
-        rent_start_date,
-        rent_end_date,
-        total_price,
-        bookingId
-    ]);
+    `, [rent_start_date, rent_end_date, total_price, bookingId]);
 
     return result.rows[0];
+};
+
+const updateBookingByUser = async (bookingId: string) => {
+
+    const currentDate = new Date().getTime();
+    const previousBooking = await pool.query(`SELECT rent_start_date FROM bookings WHERE id = $1`, [bookingId]);
+    const previousBookingDate = new Date(previousBooking.rows[0].rent_start_date).getTime();
+
+    if (currentDate >= previousBookingDate) {
+        return "Cannot update booking to an earlier date";
+    }
+
+    // cancel/ delete booking
+    const result = await pool.query(`
+        DELETE FROM bookings
+        WHERE id = $1
+        RETURNING *
+    `, [bookingId]);
+
+    // update vehicle availability
+    if (result.rowCount) {
+        const vehicle_id = result.rows[0].vehicle_id;
+        await pool.query(`
+            UPDATE vehicles SET availability_status = 'available' WHERE id = $1
+        `, [vehicle_id]);
+    }
+
+    return "Your booking update successfully";
 };
 
 export const bookingServices = {
     createBooking,
     getBookings,
     getBookingByOwner,
-    updateBooking
+    updateBookingByAdmin,
+    updateBookingByUser
 }

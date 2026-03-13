@@ -69,7 +69,30 @@ const getBookings = async (req: Request, res: Response) => {
 const updateBooking = async (req: Request, res: Response) => {
     try {
         const { bookingId } = req.params;
-        const result = await bookingServices.updateBooking(bookingId as string, req.body);
+        let result = null;
+        const tokenEmail = req?.user?.email;
+        const userEmail = req?.query?.email;
+        const userRole = req?.user?.role;
+
+        if (userRole as string === 'admin') {
+            result = await bookingServices.updateBookingByAdmin(bookingId as string, req.body);
+        } else if (userRole as string === 'customer') {
+            if (tokenEmail !== userEmail) {
+                return res.status(403).json({
+                    success: false,
+                    message: "Forbidden"
+                });
+            }
+            
+            result = await bookingServices.updateBookingByUser(bookingId as string);
+        }
+
+        if (!result) {
+            return res.status(404).json({
+                success: false,
+                message: "No bookings found"
+            });
+        }
 
         res.status(200).json({
             success: true,
