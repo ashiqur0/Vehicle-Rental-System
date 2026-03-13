@@ -7,18 +7,14 @@ const signup = async (payload: Record<string, string>) => {
     const { name, email, password, phone } = payload;
 
     if (password!.length < 6 || !email || !name || !phone) return null;
-
-    const processedEmail = (email as string).toLowerCase();
+    if (email !== email.toLowerCase()) return null;
     const hashedPassword = await bcrypt.hash(password as string, 10);
 
     const result = await pool.query(`
-        INSERT INTO users (name, email, password, phone) VALUES ($1, $2, $3, $4) RETURNING *`, [name, processedEmail, hashedPassword, phone]
+        INSERT INTO users (name, email, password, phone) VALUES ($1, $2, $3, $4) RETURNING *`, [name, email, hashedPassword, phone]
     );
 
-    const user = result.rows[0];
-    const token = jwt.sign({ name: user.name, email: user.email, role: user.role }, config.jwt_secret as string, { expiresIn: '7d' });
-
-    return { user, token };
+    return result;
 }
 
 const signin = async (email: string, password: string) => {
@@ -33,7 +29,7 @@ const signin = async (email: string, password: string) => {
 
     const token = jwt.sign({ name: user.name, email: user.email, role: user.role }, config.jwt_secret as string, { expiresIn: '7d' });
 
-    return { user, token };
+    return { token };
 }
 
 export const authServices = {
