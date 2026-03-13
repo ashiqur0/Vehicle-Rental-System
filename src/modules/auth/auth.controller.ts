@@ -8,14 +8,13 @@ const signup = async (req: Request, res: Response) => {
         if (!result) {
             return res.status(400).json({
                 success: false,
-                message: "Password must be at least 6 characters long. Name, email, and phone are required."
+                message: "Password must be at least 6 characters long. Name, email, and phone are required. Email must be in lowercase."
             });
         }
 
         res.status(201).json({
             success: true,
-            message: "User created successfully",
-            data: { user: result.user, token: result.token }
+            message: "User created successfully"
         });
     } catch (error: any) {
         res.status(500).json({
@@ -42,7 +41,7 @@ const signin = async (req: Request, res: Response) => {
         res.status(200).json({
             success: true,
             message: "User signed in successfully",
-            data: { user: result.user, token: result.token }
+            data: { token: result.token }
         })
     } catch (error: any) {
         res.status(500).json({
