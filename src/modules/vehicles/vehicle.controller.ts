@@ -24,9 +24,10 @@ const getVehicles = async (req: Request, res: Response) => {
         const result = await vehicleServices.getVehicles();
 
         if (result.rowCount === 0) {
-            return res.status(404).json({
-                success: false,
-                message: "No vehicles found"
+            return res.status(200).json({
+                success: true,
+                message: "No vehicles found",
+                data: result.rows
             });
         }
 
@@ -52,7 +53,7 @@ const getSingleVehicle = async (req: Request, res: Response) => {
         if (result.rowCount === 0) {
             return res.status(404).json({
                 success: false,
-                message: "Vehicle not found"
+                message: "Vehicle not found",
             });
         }
 
