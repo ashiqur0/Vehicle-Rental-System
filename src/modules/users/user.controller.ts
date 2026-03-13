@@ -46,8 +46,8 @@ const updateUser = async (req: Request, res: Response) => {
 
             result = await userServices.updateUserByOwner(req.body, userId as string);
         }
-
-        if (result?.rowCount === 0) {
+        
+        if (result === null) {
             return res.status(404).json({
                 success: false,
                 message: "User not found"
@@ -56,7 +56,7 @@ const updateUser = async (req: Request, res: Response) => {
             res.status(200).json({
                 success: true,
                 message: "User updated successfully",
-                data: result?.rows[0]
+                data: result
             });
         }
     } catch (error: any) {
