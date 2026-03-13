@@ -2,8 +2,8 @@ import { NextFunction, Request, Response } from "express";
 import config from "../config";
 import jwt, { JwtPayload } from "jsonwebtoken";
 
-const auth = async (...roles: string[]) => {
-    return (req: Request, res: Response, next: NextFunction) => {
+const auth = (...roles: string[]) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
         try {
             const token = req.headers.authorization;
             if (!token) {
