@@ -1,6 +1,27 @@
 import { pool } from "../../config/db";
 
-async function calculateTotalPrice(vehicle_id: number, rent_start_date: string, rent_end_date: string): Promise<number> {
+// helper function
+const systemAutoUpdateStatus = async () => {
+    const result = await pool.query(`
+        UPDATE bookings
+        SET status = 'returned'
+        WHERE status = 'active'
+          AND rent_end_date < CURRENT_DATE
+        RETURNING vehicle_id
+    `);
+
+    if (result.rowCount) {
+        const vehicleIds = [...new Set(result.rows.map((row) => row.vehicle_id))];
+        await pool.query(`
+            UPDATE vehicles
+            SET availability_status = 'available'
+            WHERE id = ANY($1::int[])
+        `, [vehicleIds]);
+    }
+};
+
+// helper function
+const calculateTotalPrice = async (vehicle_id: number, rent_start_date: string, rent_end_date: string): Promise<number> => {
     const vehicleResult = await pool.query(`SELECT daily_rent_price FROM vehicles WHERE id = $1`, [vehicle_id]);
     const daily_rent_price = vehicleResult.rows[0].daily_rent_price;
 
@@ -57,12 +78,16 @@ const createBooking = async (payload: Record<string, unknown>) => {
 }
 
 const getBookings = async () => {
+    await systemAutoUpdateStatus();
+
     const result = await pool.query(`SELECT * FROM bookings`);
 
     return result.rows;
 }
 
 const getBookingByOwner = async (userEmail: string) => {
+    await systemAutoUpdateStatus();
+
     const result = await pool.query(`
         SELECT b.* FROM bookings b
         JOIN users u ON b.customer_id = u.id
@@ -75,7 +100,7 @@ const updateBookingByAdmin = async (bookingId: string) => {
     const result = await pool.query(`
         UPDATE vehicles SET availability_status = 'available' 
         WHERE id IN (
-            SELECT vehicle_id FROM bookings WHERE status = 'returned' AND id = $1
+            SELECT vehicle_id FROM bookings WHERE status = 'returned' OR status = 'cancelled' AND id = $1
         )
     `, [bookingId]);
 
