@@ -35,11 +35,10 @@ const calculateTotalPrice = async (vehicle_id: number, rent_start_date: string, 
 }
 
 const createBooking = async (payload: Record<string, unknown>) => {
-    // date format: YYYY-MM-DD for example: 2026-03-01
     const { customer_id, vehicle_id, rent_start_date, rent_end_date } = payload;
 
     // check if vehicle is available
-    const vehicleResult = await pool.query(`SELECT availability_status, vehicle_name, daily_rent_price FROM vehicles WHERE id = $1`, [vehicle_id]);
+    const vehicleResult = await pool.query(`SELECT availability_status, vehicle_name, daily_rent_price, type FROM vehicles WHERE id = $1`, [vehicle_id]);
     if (vehicleResult.rowCount === 0) {
         return "Vehicle not found";
     }
