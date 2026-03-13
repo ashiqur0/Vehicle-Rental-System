@@ -22,6 +22,7 @@ const auth = (...roles: string[]) => {
                     message: "Forbidden"
                 });
             }
+            
             next();
         } catch (error: any) {
             res.status(500).json({
