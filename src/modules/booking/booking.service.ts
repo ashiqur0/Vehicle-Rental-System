@@ -1,5 +1,4 @@
 import { pool } from "../../config/db";
-import { bookingController } from "./booking.controller";
 
 async function calculateTotalPrice(vehicle_id: number, rent_start_date: string, rent_end_date: string): Promise<number> {
     const vehicleResult = await pool.query(`SELECT daily_rent_price FROM vehicles WHERE id = $1`, [vehicle_id]);
