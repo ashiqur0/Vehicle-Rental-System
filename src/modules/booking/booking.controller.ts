@@ -75,7 +75,7 @@ const updateBooking = async (req: Request, res: Response) => {
         const userRole = req?.user?.role;
 
         if (userRole as string === 'admin') {
-            result = await bookingServices.updateBookingByAdmin(bookingId as string, req.body);
+            result = await bookingServices.updateBookingByAdmin(bookingId as string);
         } else if (userRole as string === 'customer') {
             if (tokenEmail !== userEmail) {
                 return res.status(403).json({

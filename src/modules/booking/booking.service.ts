@@ -71,23 +71,15 @@ const getBookingByOwner = async (userEmail: string) => {
     return result.rows;
 }
 
-const updateBookingByAdmin = async (bookingId: string, payload: Record<string, unknown>) => {
-    const { rent_start_date, rent_end_date } = payload;
-
-    const total_price = await calculateTotalPrice(
-        parseInt(bookingId),
-        rent_start_date as string,
-        rent_end_date as string
-    );
-
+const updateBookingByAdmin = async (bookingId: string) => {
     const result = await pool.query(`
-        UPDATE bookings
-        SET rent_start_date = $1, rent_end_date = $2, total_price = $3
-        WHERE id = $4
-        RETURNING *
-    `, [rent_start_date, rent_end_date, total_price, bookingId]);
+        UPDATE vehicles SET availability_status = 'available' 
+        WHERE id IN (
+            SELECT vehicle_id FROM bookings WHERE status = 'returned' AND id = $1
+        )
+    `, [bookingId]);
 
-    return result.rows[0];
+    return result.rowCount ? "Bookings updated successfully" : "No bookings to update";
 };
 
 const updateBookingByUser = async (bookingId: string) => {
@@ -100,9 +92,10 @@ const updateBookingByUser = async (bookingId: string) => {
         return "Cannot update booking to an earlier date";
     }
 
-    // cancel/ delete booking
+    // change booking status to: cancelled
     const result = await pool.query(`
-        DELETE FROM bookings
+        UPDATE bookings
+        SET status = 'cancelled'
         WHERE id = $1
         RETURNING *
     `, [bookingId]);
@@ -115,7 +108,7 @@ const updateBookingByUser = async (bookingId: string) => {
         `, [vehicle_id]);
     }
 
-    return "Your booking update successfully";
+    return "Your booking has been cancelled successfully";
 };
 
 export const bookingServices = {
