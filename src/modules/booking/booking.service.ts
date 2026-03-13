@@ -62,7 +62,32 @@ const getBookings = async () => {
     return result.rows;
 }
 
+const updateBooking = async (bookingId: string, payload: Record<string, unknown>) => {
+    const { rent_start_date, rent_end_date } = payload;
+
+    const total_price = await calculateTotalPrice(
+        parseInt(bookingId),
+        rent_start_date as string,
+        rent_end_date as string
+    );
+
+    const result = await pool.query(`
+        UPDATE bookings
+        SET rent_start_date = $1, rent_end_date = $2, total_price = $3
+        WHERE id = $4
+        RETURNING *
+    `, [
+        rent_start_date,
+        rent_end_date,
+        total_price,
+        bookingId
+    ]);
+
+    return result.rows[0];
+};
+
 export const bookingServices = {
     createBooking,
     getBookings,
+    updateBooking
 }
