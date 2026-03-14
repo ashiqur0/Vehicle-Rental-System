@@ -43,9 +43,26 @@ const updateUserByOwner = async (payload: Record<string, unknown>, userId: strin
 
 
 const deleteUser = async (userId: string) => {
-    const result = await pool.query(`DELETE FROM users WHERE id = $1`, [userId]);
+    const result = await pool.query(`
+        DELETE FROM users
+        WHERE id = $1
+        AND NOT EXISTS (
+            SELECT 1 
+            FROM bookings 
+            WHERE customer_id = $1 
+            AND status = 'active'
+        )
+        RETURNING *;`, [userId]);
 
-    return result;
+    const processedResult = {
+        id: result?.rows[0]?.id,
+        name: result?.rows[0]?.name,
+        email: result?.rows[0]?.email,
+        phone: result?.rows[0]?.phone,
+        role: result?.rows[0]?.role
+    }
+
+    return processedResult;
 }
 
 export const userServices = {
