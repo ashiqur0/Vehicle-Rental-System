@@ -115,8 +115,7 @@ const getBookingByOwner = async (userEmail: string) => {
         JOIN vehicles v ON b.vehicle_id = v.id
         WHERE b.customer_id = (
             SELECT id FROM users WHERE email = $1
-        )
-    `, [userEmail]);
+        )`, [userEmail]);
 
     const bookingsByOwner = bookings.rows;
     const processedBookingsByOwner = bookingsByOwner.map((booking) => ({
@@ -165,15 +164,17 @@ const updateBookingByUser = async (bookingId: string) => {
         RETURNING *
     `, [bookingId]);
 
-    // update vehicle availability
-    if (result.rowCount) {
-        const vehicle_id = result.rows[0].vehicle_id;
-        await pool.query(`
-            UPDATE vehicles SET availability_status = 'available' WHERE id = $1
-        `, [vehicle_id]);
+    const processedResult = {
+        id: result.rows[0].id,
+        customer_id: result.rows[0].customer_id,
+        vehicle_id: result.rows[0].vehicle_id,
+        rent_start_date: result.rows[0].rent_start_date.toISOString().split('T')[0],
+        rent_end_date: result.rows[0].rent_end_date.toISOString().split('T')[0],
+        total_price: result.rows[0].total_price,
+        status: result.rows[0].status
     }
 
-    return "Your booking has been cancelled successfully";
+    return processedResult;
 };
 
 export const bookingServices = {
