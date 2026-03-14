@@ -137,13 +137,35 @@ const getBookingByOwner = async (userEmail: string) => {
 
 const updateBookingByAdmin = async (bookingId: string) => {
     const result = await pool.query(`
-        UPDATE vehicles SET availability_status = 'available' 
-        WHERE id IN (
-            SELECT vehicle_id FROM bookings WHERE status = 'returned' OR status = 'cancelled' AND id = $1
-        )
-    `, [bookingId]);
+        WITH updated_booking AS (
+            UPDATE bookings
+            SET status = 'returned'
+            WHERE id = $1
+            RETURNING *
+        ),
+        updated_vehicle AS (
+            UPDATE vehicles
+            SET availability_status = 'available'
+            WHERE id = (SELECT vehicle_id FROM updated_booking)
+            RETURNING availability_status)
+            SELECT b.*, v.availability_status FROM
+            updated_booking b, updated_vehicle v
+        `, [bookingId]);
 
-    return result.rowCount ? "Bookings updated successfully" : "No bookings to update";
+    const processedResult = {
+        id: result.rows[0].id,
+        customer_id: result.rows[0].customer_id,
+        vehicle_id: result.rows[0].vehicle_id,
+        rent_start_date: result.rows[0].rent_start_date.toISOString().split('T')[0],
+        rent_end_date: result.rows[0].rent_end_date.toISOString().split('T')[0],
+        total_price: result.rows[0].total_price,
+        status: result.rows[0].status,
+        vehicle: {
+            availability_status: result.rows[0].availability_status
+        }
+    }
+
+    return processedResult;
 };
 
 const updateBookingByUser = async (bookingId: string) => {
