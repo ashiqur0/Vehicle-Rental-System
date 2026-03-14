@@ -5,6 +5,13 @@ const getUsers = async (req: Request, res: Response) => {
     try {
         const result = await userServices.getUsers();
 
+        if (result.rowCount === 0) {
+            return res.status(200).json({
+                success: true,
+                message: "No users found"
+            });
+        }
+
         res.status(200).json({
             success: true,
             message: "Users retrieved successfully",
@@ -39,8 +46,8 @@ const updateUser = async (req: Request, res: Response) => {
 
             result = await userServices.updateUserByOwner(req.body, userId as string);
         }
-
-        if (result?.rowCount === 0) {
+        
+        if (result === null) {
             return res.status(404).json({
                 success: false,
                 message: "User not found"
@@ -49,7 +56,7 @@ const updateUser = async (req: Request, res: Response) => {
             res.status(200).json({
                 success: true,
                 message: "User updated successfully",
-                data: result?.rows[0]
+                data: result
             });
         }
     } catch (error: any) {
@@ -66,15 +73,16 @@ const deleteUser = async (req: Request, res: Response) => {
     try {
         const result = await userServices.deleteUser(userId as string);
 
-        if (result.rowCount === 0) {
+        if (!result.id) {
             return res.status(404).json({
                 success: false,
-                message: "User not found"
+                message: "The customer has an active booking. So, cannot be deleted"
             });
         } else {
             res.status(200).json({
                 success: true,
-                message: "User deleted successfully"
+                message: "User deleted successfully",
+                data: result
             });
         }
     } catch (error: any) {

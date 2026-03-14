@@ -31,10 +31,11 @@ const getBookings = async (req: Request, res: Response) => {
         let result = null;
         const tokenEmail = req?.user?.email;
         const userEmail = req?.query?.email;
+        const userRole = req?.user?.role;
 
-        if (req?.user?.role === 'admin') {
+        if (userRole === 'admin') {
             result = await bookingServices.getBookings();
-        } else if (req?.user?.role === 'customer') {
+        } else if (userRole === 'customer') {
             if (tokenEmail !== userEmail) {
                 return res.status(403).json({
                     success: false,
@@ -45,9 +46,9 @@ const getBookings = async (req: Request, res: Response) => {
             result = await bookingServices.getBookingByOwner(userEmail as string);
         }
 
-        if (!result) {
-            return res.status(404).json({
-                success: false,
+        if (result?.length === 0) {
+            return res.status(200).json({
+                success: true,
                 message: "No bookings found"
             });
         }
@@ -96,7 +97,7 @@ const updateBooking = async (req: Request, res: Response) => {
 
         res.status(200).json({
             success: true,
-            message: "Booking updated successfully",
+            message: userRole === 'admin' ? "Booking marked as returned. Vehicle is now available" : userRole === 'customer' && "Booking cancelled successfully",
             data: result
         });
     } catch (error: any) {
