@@ -110,12 +110,30 @@ const getBookings = async () => {
 const getBookingByOwner = async (userEmail: string) => {
     await systemAutoUpdateStatus();
 
-    const result = await pool.query(`
-        SELECT b.* FROM bookings b
-        JOIN users u ON b.customer_id = u.id
-        WHERE u.email = $1`, [userEmail]);
+    const bookings = await pool.query(`
+        SELECT b.*, v.vehicle_name, v.registration_number, v.type FROM bookings b 
+        JOIN vehicles v ON b.vehicle_id = v.id
+        WHERE b.customer_id = (
+            SELECT id FROM users WHERE email = $1
+        )
+    `, [userEmail]);
 
-    return result.rows;
+    const bookingsByOwner = bookings.rows;
+    const processedBookingsByOwner = bookingsByOwner.map((booking) => ({
+        id: booking.id,
+        vehicle_id: booking.vehicle_id,
+        rent_start_date: booking.rent_start_date.toISOString().split('T')[0],
+        rent_end_date: booking.rent_end_date.toISOString().split('T')[0],
+        total_price: booking.total_price,
+        status: booking.status,
+        vehicle: {
+            vehicle_name: booking.vehicle_name,
+            registration_number: booking.registration_number,
+            type: booking.type
+        }
+    }));
+
+    return processedBookingsByOwner;
 }
 
 const updateBookingByAdmin = async (bookingId: string) => {
