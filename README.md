@@ -125,4 +125,3 @@ A backend API for a vehicle rental management system that handles:
 ## 📚 Additional Resources
 
 - **[API Reference](API_REFERENCE.md)** - Detailed endpoint documentation with request/response examples
-- **[Submission Guide](SUBMISSION_GUIDE.md)** - Assignment submission requirements and deadlines
