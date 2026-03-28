@@ -22,7 +22,7 @@ A backend API for a vehicle rental management system that handles:
 
 ## 📁 Code Structure
 
-> **IMPORTANT:** Your implementation **MUST** follow a **modular pattern** with clear separation of concerns. Organize your code into feature-based modules (e.g., auth, users, vehicles, bookings) with proper layering (routes, controllers, services).
+> **IMPORTANT:** All API implementation followed the **modular pattern** with clear separation of concerns. Organize your code into feature-based modules (e.g., auth, users, vehicles, bookings) with proper layering (routes, controllers, services).
 
 ---
 
@@ -80,7 +80,7 @@ A backend API for a vehicle rental management system that handles:
 
 > 📖 **For detailed request/response specifications, see the [API Reference](API_REFERENCE.md)**
 
-> ⚠️ **IMPORTANT:** All API endpoint implementations **MUST** exactly match the specifications defined in **[API Reference](API_REFERENCE.md)**. This includes:
+> ⚠️ **IMPORTANT:** All API endpoint implementations are match the specifications defined in **[API Reference](API_REFERENCE.md)**. This includes:
 > - Exact URL patterns (e.g., `/api/v1/vehicles/:vehicleId`)
 > - Request body structure and field names
 > - Response format and data structure
