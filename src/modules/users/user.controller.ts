@@ -28,7 +28,7 @@ const getUsers = async (req: Request, res: Response) => {
 
 const updateUser = async (req: Request, res: Response) => {
     const { userId } = req.params;
-    const { email } = req.query;
+    // const { email } = req.query;
 
     try {
 
@@ -37,7 +37,10 @@ const updateUser = async (req: Request, res: Response) => {
         if (req?.user?.role === 'admin') {
             result = await userServices.updateUserByAdmin(req.body, userId as string);
         } else if (req?.user?.role === 'customer') {
-            if (email !== req?.user?.email) {
+            const verifyUser = await userServices.getUserById(userId as string);
+
+            // verify user before allowing to update
+            if (verifyUser?.email !== req?.user?.email) {
                 return res.status(403).json({
                     success: false,
                     message: "You are not allowed to update this user"
@@ -46,7 +49,7 @@ const updateUser = async (req: Request, res: Response) => {
 
             result = await userServices.updateUserByOwner(req.body, userId as string);
         }
-        
+
         if (result === null) {
             return res.status(404).json({
                 success: false,

@@ -6,6 +6,11 @@ const getUsers = async () => {
     return result;
 }
 
+const getUserById = async (userId: string) => {
+    const result = await pool.query(`SELECT * FROM users WHERE id = $1`, [userId]);
+    return result.rows[0];
+};
+
 const updateUserByAdmin = async (payload: Record<string, unknown>, userId: string) => {
     const { name, email, phone, role } = payload;
     const result = await pool.query(`
@@ -67,6 +72,7 @@ const deleteUser = async (userId: string) => {
 
 export const userServices = {
     getUsers,
+    getUserById,
     updateUserByAdmin,
     updateUserByOwner,
     deleteUser
