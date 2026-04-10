@@ -59,15 +59,7 @@ const deleteUser = async (userId: string) => {
         )
         RETURNING *;`, [userId]);
 
-    const processedResult = {
-        id: result?.rows[0]?.id,
-        name: result?.rows[0]?.name,
-        email: result?.rows[0]?.email,
-        phone: result?.rows[0]?.phone,
-        role: result?.rows[0]?.role
-    }
-
-    return processedResult;
+    return result;
 }
 
 export const userServices = {

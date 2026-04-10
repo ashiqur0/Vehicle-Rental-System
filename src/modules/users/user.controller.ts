@@ -76,7 +76,7 @@ const deleteUser = async (req: Request, res: Response) => {
     try {
         const result = await userServices.deleteUser(userId as string);
 
-        if (!result.id) {
+        if (!result?.rows[0]?.id) {
             return res.status(404).json({
                 success: false,
                 message: "The customer has an active booking. So, cannot be deleted"
@@ -84,8 +84,7 @@ const deleteUser = async (req: Request, res: Response) => {
         } else {
             res.status(200).json({
                 success: true,
-                message: "User deleted successfully",
-                data: result
+                message: "User deleted successfully"
             });
         }
     } catch (error: any) {
