@@ -168,6 +168,20 @@ const updateBookingByAdmin = async (bookingId: string) => {
     return processedResult;
 };
 
+const getBookingById = async (bookingId: string) => {
+    const result = await pool.query(`SELECT * FROM bookings WHERE id = $1`, [bookingId]);
+
+    if (result.rowCount === 0) {
+        return null;
+    }
+
+    // find and add customer email 
+    const customer = await pool.query(`SELECT email, name FROM users WHERE id = $1`, [result.rows[0].customer_id]);
+    result.rows[0].customer_email = customer.rows[0].email;
+
+    return result.rows[0];
+};
+
 const updateBookingByUser = async (bookingId: string) => {
 
     const currentDate = new Date().getTime();
@@ -204,5 +218,6 @@ export const bookingServices = {
     getBookings,
     getBookingByOwner,
     updateBookingByAdmin,
+    getBookingById,
     updateBookingByUser
 }

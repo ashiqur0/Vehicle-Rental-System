@@ -30,20 +30,12 @@ const getBookings = async (req: Request, res: Response) => {
     try {
         let result = null;
         const tokenEmail = req?.user?.email;
-        const userEmail = req?.query?.email;
         const userRole = req?.user?.role;
 
         if (userRole === 'admin') {
             result = await bookingServices.getBookings();
-        } else if (userRole === 'customer') {
-            if (tokenEmail !== userEmail) {
-                return res.status(403).json({
-                    success: false,
-                    message: "Forbidden"
-                });
-            }
-            
-            result = await bookingServices.getBookingByOwner(userEmail as string);
+        } else if (userRole === 'customer') {            
+            result = await bookingServices.getBookingByOwner(tokenEmail as string);
         }
 
         if (result?.length === 0) {
@@ -72,13 +64,16 @@ const updateBooking = async (req: Request, res: Response) => {
         const { bookingId } = req.params;
         let result = null;
         const tokenEmail = req?.user?.email;
-        const userEmail = req?.query?.email;
+        // const userEmail = req?.query?.email;
         const userRole = req?.user?.role;
 
         if (userRole as string === 'admin') {
             result = await bookingServices.updateBookingByAdmin(bookingId as string);
         } else if (userRole as string === 'customer') {
-            if (tokenEmail !== userEmail) {
+            const booking = await bookingServices.getBookingById(bookingId as string);
+            
+            // verify the ownership of the booking before allowing update
+            if (!booking || booking.customer_email !== tokenEmail) {
                 return res.status(403).json({
                     success: false,
                     message: "Forbidden"
